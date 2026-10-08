@@ -1,0 +1,750 @@
+/* ==========================================
+   qbx_pthud | Unified Style — Monitor Fix
+   Tüm pozisyonlar px cinsinden sabit tutuldu.
+   vw/vh kayma sorunu giderildi.
+   Author: Mirage
+   ========================================== */
+
+/* ==========================================
+   GLOBAL RESET + CSS DEĞIŞKENLERI
+   Tek yerden boyut değiştirmek için.
+   ========================================== */
+:root {
+    /* Minimap */
+    --map-size:        10.5vw;  /* Minimap çapı (ekran genişliği) — client.lua MAP_SIZE */
+    --map-top:         10vh;    /* Ekran üstünden boşluk — client.lua MAP_TOP */
+    --map-right:      1.3vw;    /* Ekran sağından boşluk — client.lua MAP_RIGHT */
+
+    /* Sol alt HUD */
+    --hud-bottom:       26px;
+    --hud-left:         24px;
+
+    /* Oyuncu bilgi (sol üst) */
+    --info-top:         30px;
+    --info-left:        24px;
+
+    /* Araç HUD (sağ alt) */
+    --veh-bottom:       10px;
+    --veh-right:        72px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: "Montserrat", sans-serif; }
+body { overflow: hidden; background: transparent; }
+
+/* ==========================================
+   PLAYER INFO HUD (Sol Üst)
+   ========================================== */
+.player-info-hud {
+    position: fixed;
+    top:  var(--info-top);
+    left: var(--info-left);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    z-index: 100;
+}
+
+.pi-id {
+    background: rgba(240,240,240,0.95);
+    color: #111;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-style: italic;
+    text-shadow: none;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin-top: 1px;
+}
+
+.pi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.pi-name {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    line-height: 1;
+    letter-spacing: 0.5px;
+}
+
+.pi-job {
+    color: rgba(220,220,220,0.85);
+    font-size: 10px;
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+}
+
+.pi-money {
+    display: flex;
+    gap: 6px;
+}
+
+.money-badge {
+    background: rgba(35,35,35,0.95);
+    border-radius: 5px;
+    padding: 3px 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 900;
+    font-style: italic;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.cash-badge { color: #ffffff; }
+.cash-badge i { color: rgba(255,255,255,0.7); font-size: 10px; }
+.bank-badge { color: #00d0ff; }
+.bank-badge i { color: #00d0ff; font-size: 10px; }
+
+/* ==========================================
+   ANA HUD KAPSAYICI (Sol Alt)
+   ========================================== */
+.hud-container {
+    position: fixed;
+    bottom: var(--hud-bottom);
+    left:   var(--hud-left);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.hud-separator {
+    width: 2px;
+    height: 18px;
+    background-color: rgba(255,255,255,0.4);
+    border-radius: 1px;
+    margin-top: 9px;
+}
+
+/* ==========================================
+   MİKROFON
+   ========================================== */
+.mic-wrapper { padding: 3px; }
+
+.mic-container {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(15,15,15,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    position: relative;
+    overflow: hidden;
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+.mic-container i { z-index: 2; position: relative; }
+
+/* ==========================================
+   STATS BARLARI
+   ========================================== */
+.stats-container { display: flex; flex-direction: column; gap: 5px; }
+
+.bars-row { display: flex; gap: 2px; }
+
+.bar-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 130px;
+}
+
+.bar-wrapper {
+    position: relative;
+    width: 130px;
+    height: 36px;
+    background-color: rgba(15,15,15,0.85);
+    border-radius: 20px;
+    overflow: hidden;
+}
+.health-wrapper { border-radius: 20px 0 0 20px; }
+.armor-wrapper  { border-radius: 0 20px 20px 0; }
+
+.bar-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    transition: width 0.3s ease;
+    z-index: 1;
+}
+
+.bar-content {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 0.5px;
+    color: white;
+    mix-blend-mode: difference;
+}
+
+/* Sub-bar (açlık/susuzluk) */
+.sub-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 130px;
+}
+
+.sub-bar-track {
+    height: 3px;
+    background-color: rgba(15,15,15,0.85);
+    overflow: hidden;
+}
+.bar-column:first-child .sub-bar-track {
+    width: 115px;
+    align-self: flex-end;
+    border-radius: 3px 0 0 3px;
+}
+.bar-column:last-child .sub-bar-track {
+    width: 115px;
+    align-self: flex-start;
+    border-radius: 0 3px 3px 0;
+}
+.sub-bar-fill {
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    transition: width 0.3s ease;
+}
+
+.sub-icon-bg {
+    width: 20px; height: 20px;
+    background-color: rgba(15,15,15,0.65);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.sub-icon { font-size: 10px; color: rgba(255,255,255,0.8); }
+
+/* ==========================================
+   DURUM İKONLARI
+   ========================================== */
+.status-icons-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.status-icon-circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 13px;
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+}
+.bleed-circle   { background-color: #8e44ad; }
+.bone-circle    { background-color: #d68910; }
+.stress-circle  { background-color: rgba(15,15,15,0.85); }
+.stress-circle i { z-index: 2; position: relative; }
+.devmode-circle { background-color: #2ecc71; font-size: 11px; }
+
+@keyframes bleedPulse {
+    0%   { box-shadow: 0 0 5px rgba(255,0,0,0.4);  transform: scale(1);   }
+    50%  { box-shadow: 0 0 20px rgba(255,0,0,0.9); transform: scale(1.1); }
+    100% { box-shadow: 0 0 5px rgba(255,0,0,0.4);  transform: scale(1);   }
+}
+.bleed-critical { animation: bleedPulse 0.8s infinite; }
+
+/* ==========================================
+   MERKEZ BARLAR (Stamina / O2)
+   — Her iki HUD ile çakışmaması için
+     merkez hesabı px + transform ile yapılır
+   ========================================== */
+.center-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    pointer-events: none;
+}
+
+.center-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.9;
+}
+
+.center-icon {
+    color: white;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+.center-track {
+    width: 200px; height: 4px;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.center-fill {
+    height: 100%; width: 100%;
+    background-color: white;
+    transition: width 0.2s linear;
+}
+
+#oxygen-fill { background-color: #00ffff; }
+
+/* ==========================================
+   SİLAH HUD (Sağ Üst)
+   ========================================== */
+.weapon-hud {
+    position: fixed;
+    top: 20px;
+    right: 18px;
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
+    color: white;
+    font-style: italic;
+    text-shadow: rgba(0,0,0,0.9) 2px 2px 5px;
+    background: linear-gradient(to right, transparent, rgba(0,0,0,0.4));
+    padding: 10px 20px;
+    border-radius: 10px;
+    border-right: 4px solid white;
+}
+.weapon-icon { font-size: 20px; color: rgba(255,255,255,0.6); margin-right: 10px; align-self: center; }
+.ammo-clip   { font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+.ammo-sep    { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 800; margin-bottom: 3px; }
+.ammo-total  { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 800; margin-bottom: 2px; }
+
+/* ==========================================
+   CROSSHAIR
+   ========================================== */
+.custom-crosshair {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 100;
+}
+.crosshair-dot {
+    width: 4px; height: 4px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 2px black;
+}
+
+/* ==========================================
+   SİNEMATİK BARLAR
+   ========================================== */
+.cinematic-bar {
+    position: fixed;
+    left: 0; width: 100%; height: 0;
+    background-color: black;
+    z-index: 9999;
+    transition: height 0.8s ease-in-out;
+}
+.top-bar    { top: 0; }
+.bottom-bar { bottom: 0; }
+
+/* ==========================================
+   ARAÇ HUD (Sağ Alt) — px bazlı
+   ========================================== */
+.vehicle-hud {
+    position: fixed;
+    bottom: var(--veh-bottom);
+    right:  var(--veh-right);
+    display: flex;
+    align-items: center;
+}
+
+.speedometer {
+    position: relative;
+    width: 150px; height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gauges {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+}
+
+.rpm-bg {
+    fill: none;
+    stroke: rgba(40,40,40,0.9);
+    stroke-width: 12;
+    stroke-linecap: butt;
+}
+.rpm-fg {
+    fill: none;
+    stroke-width: 9;
+    stroke-linecap: butt;
+    transition: stroke-dashoffset 0.1s linear;
+}
+.fuel-fg  { transition: stroke-dashoffset 0.5s ease; }
+.nitro-fg { transition: stroke-dashoffset 0.5s ease-out, stroke 0.3s; }
+
+.speed-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.gear-circle {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+    color: white;
+    background-color: rgba(15,15,15,0.85);
+    margin-bottom: 1px;
+}
+
+.gear-label {
+    font-size: 8px; font-weight: 800;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    margin-bottom: 1px;
+}
+
+.speed-value-container { display: flex; justify-content: center; margin-bottom: -4px; }
+
+.speed-value {
+    font-size: 58px; font-weight: 900;
+    color: white; line-height: 0.9;
+    font-style: italic;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+    letter-spacing: -4px;
+    display: flex;
+    transform: scaleX(0.7) scaleY(1.1);
+}
+.faded-zero { color: rgba(255,255,255,0.35); }
+
+.speed-unit {
+    font-size: 10px; font-weight: 800;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    font-style: italic;
+}
+
+.fuel-icon-overlay {
+    position: absolute;
+    right: -20px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px; color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.3s;
+}
+.fuel-icon-overlay.active-fuel { color: #e74c3c; animation: flash 1s infinite; }
+
+.veh-icons {
+    position: absolute;
+    right: -55px; top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.v-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background-color: rgba(15,15,15,0.85);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    transition: color 0.3s;
+}
+.v-icon.active-lights   { color: #f1c40f; }
+.v-icon.active-seatbelt { color: #e74c3c; animation: flash 1s infinite; }
+.v-icon.seatbelt-on     { color: #2ecc71; }
+.v-icon.locked          { color: #e74c3c; }
+.v-icon.unlocked        { color: rgba(255,255,255,0.4); }
+
+@keyframes flash {
+    0%   { opacity: 1.0; }
+    50%  { opacity: 0.4; }
+    100% { opacity: 1.0; }
+}
+
+/* Motor Sağlık Barı */
+.veh-center-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* Nitro Purge Alert */
+@keyframes nitroPurgeFlash {
+    0%   { border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 10px #ffaa00; }
+    50%  { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 20px #ff0000; }
+    100% { border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 10px #ffaa00; }
+}
+.nitro-purge-alert { animation: nitroPurgeFlash 0.5s infinite !important; }
+
+/* ==========================================
+   MİNİHARİTA / PUSULA
+   — Tamamen px bazlı, hiç vw/vh yok.
+   — Lua tarafındaki GTA koordinatlarıyla
+     uyumlu sağ-üst konumlandırma.
+   ========================================== */
+.compass-container {
+    position: fixed;
+    top:   var(--map-top);
+    right: var(--map-right);
+    /* Genişliği map-ring genişliğine + waypoint için pay */
+    width: var(--map-size);   /* halka sağ kenara tam yaslı → Lua ile aynı merkez */
+}
+
+/* Derece göstergesi — haritanın tam üstü */
+.compass-degree {
+    position: absolute;
+    /* map-ring merkezi: map-size/2'nin px hizası */
+    top:  calc(var(--map-size) * -0.18);
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 800;
+    font-size: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    color: white;
+    z-index: 5;
+    white-space: nowrap;
+}
+
+.map-ring {
+    position: relative;
+    width:  var(--map-size);
+    height: var(--map-size);
+    border-radius: 50%;
+}
+
+.mapborder {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-radius: 50%;
+    box-shadow:
+        0 0 15px 5px rgba(0,0,0,0.35),
+        inset 0 0 8px rgba(0,0,0,0.3);
+}
+.mapborder::after {
+    content: "";
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    border: 10px solid rgba(20,20,20,0.6);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+/* Pusula harfleri çemberi — haritanın dışına çıkar */
+.compass-letters {
+    position: absolute;
+    top:  -14px;
+    left: -14px;
+    width:  calc(100% + 28px);
+    height: calc(100% + 28px);
+    border-radius: 50%;
+    transform-origin: center center;
+    pointer-events: none;
+}
+
+.letter {
+    position: absolute;
+    font-weight: 800;
+    font-size: 0.68vw;
+    color: white;
+    transform: translate(-50%, -50%);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+}
+.n { top: 0%;   left: 50%; }
+.s { top: 100%; left: 50%; }
+.e { top: 50%;  left: 100%; }
+.w { top: 50%;  left: 0%; }
+
+/* Waypoint kutusu — haritanın sol orta kısmı */
+.waypoint-box {
+    position: absolute;
+    right: calc(var(--map-size) - 0.4vw);   /* haritanın SOL ALT köşesi */
+    top:   88%;
+    transform: translateY(-50%);
+    background-color: white;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 0.35vw;
+    padding: 0.28vw 1.1vw 0.28vw 0.6vw;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 0.85vw;
+    z-index: 10;
+    clip-path: polygon(0 0, 88% 0, 100% 100%, 0 100%);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+    white-space: nowrap;
+}
+.waypoint-box i { font-size: 0.8vw; }
+
+/* Bölge / Cadde bilgisi — haritanın altı */
+.location-info {
+    position: absolute;
+    top: calc(var(--map-size) + 1.5vw);  /* dış halkanın altında, harita ile hizalı */
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(var(--map-size) + 6vw);
+    padding-left: 1px;   /* letter-spacing kaynaklı sağa kaymayı dengeler */
+    box-sizing: content-box;
+    text-align: center;
+    font-style: italic;
+    font-weight: 800;
+    line-height: 1.2;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    white-space: nowrap;
+}
+.zone   { font-size: 0.72vw; letter-spacing: 1px; }
+.street { font-size: 0.80vw; letter-spacing: 0.5px; }
+
+/* Tick işaretleri */
+.minimap-ticks {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+.minimap-ticks .tick {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px; height: 8px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    /* translateY değeri: map-size/2 + biraz dışarı */
+    transform-origin: 50% 50%;
+    box-shadow: 0 0 2px rgba(0,0,0,0.8);
+}
+
+/* Tick'lerin haritanın dış kenarına oturması için
+   JS tarafında hesaplanan inline transform'u koruyoruz,
+   ama fallback olarak burada da tanımlıyoruz. */
+.minimap-ticks .tick {
+    transform: translate(-50%, -50%)
+               rotate(var(--tick-rot, 0deg))
+               translateY(calc(var(--map-size) * -0.54));
+}
+
+/* ==========================================
+   SAFEZONE UYARISI
+   ========================================== */
+#safezone-warning {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15,15,15,0.95);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+.sz-icon  { font-size: 80px; margin-bottom: 20px; }
+#safezone-warning h1 { font-size: 40px; margin-bottom: 15px; text-transform: uppercase; }
+#safezone-warning p  { font-size: 20px; line-height: 1.5; font-weight: 500; }
+.sz-code {
+    display: inline-block;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 800;
+}
+
+
+/* ==========================================
+   HUD MENÜSÜ (/hud)
+   ========================================== */
+#hud-menu {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.45);
+    z-index: 9000;
+    justify-content: center; align-items: center;
+}
+.hm-card {
+    width: 22vw; min-width: 300px;
+    background: rgba(20,20,22,0.96);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 18px 20px 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.hm-title { font-weight: 900; font-size: 15px; letter-spacing: 2px; margin-bottom: 14px; text-align: center; }
+.hm-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 12px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px; cursor: pointer;
+    transition: background .15s;
+}
+.hm-row:hover { background: rgba(255,255,255,0.1); }
+.hm-label { font-weight: 800; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.hm-label small { font-weight: 600; font-size: 10px; opacity: .5; font-style: italic; }
+.hm-label em { font-style: normal; font-size: 9px; background: #e74c3c; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+.hm-switch {
+    width: 38px; height: 20px; border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    position: relative; transition: background .2s; flex-shrink: 0;
+}
+.hm-switch i {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+    background: white; border-radius: 50%; transition: left .2s;
+}
+.hm-row.on .hm-switch { background: #2ecc71; }
+.hm-row.on .hm-switch i { left: 20px; }
+.hm-close {
+    width: 100%; margin-top: 6px; padding: 10px;
+    background: rgba(255,255,255,0.1); color: white; border: 0; border-radius: 8px;
+    font-weight: 800; font-size: 12px; letter-spacing: 1px; cursor: pointer;
+}
+.hm-close:hover { background: rgba(255,255,255,0.18); }
