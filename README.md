@@ -1,7 +1,5 @@
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/597f1993-e5b5-4a63-a2b9-708fc8b99718" /># NOPIXEL-INSPİREDHUD
-
+# NOPIXEL-INSPİREDHUD
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/7ba6ce80-e114-49d9-9b3a-3e3686c9187b" />
-
 
 ox_inventory/data/items.lua add item.
 ```
